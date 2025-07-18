@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 num = "0.4.3"
+md-5 = "0.10"
+regex = "1.11.1"
+lazy_static = "1.5.0"
+nalgebra = "0.33.2"
