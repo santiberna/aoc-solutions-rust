@@ -1,12 +1,14 @@
 use crate::check_result;
-use crate::utility::math::Vec2;
+use nalgebra::Vector2;
 
-fn parse_dir(c: char) -> Vec2<i32> {
+type IVec2 = Vector2<i32>;
+
+fn parse_dir(c: char) -> IVec2 {
     match c {
-        'U' => Vec2::new(0, -1),
-        'D' => Vec2::new(0, 1),
-        'L' => Vec2::new(-1, 0),
-        'R' => Vec2::new(1, 0),
+        'U' => IVec2::new(0, -1),
+        'D' => IVec2::new(0, 1),
+        'L' => IVec2::new(-1, 0),
+        'R' => IVec2::new(1, 0),
         _ => panic!(),
     }
 }
@@ -17,9 +19,9 @@ const PANEL2: [char; 25] = [
     ' ', ' ', ' ', 'D', ' ', ' ',
 ];
 
-fn part1(items: &Vec<Vec<Vec2<i32>>>) -> i64 {
+fn part1(items: &Vec<Vec<IVec2>>) -> i64 {
     let mut digits = Vec::new();
-    let mut current = Vec2::new(1, 1);
+    let mut current = IVec2::new(1, 1);
 
     for row in items.iter() {
         for dir in row.iter() {
@@ -35,9 +37,9 @@ fn part1(items: &Vec<Vec<Vec2<i32>>>) -> i64 {
     digits.iter().fold(0, |acc, &d| acc * 10 + d) as i64
 }
 
-fn part2(items: &Vec<Vec<Vec2<i32>>>) -> String {
+fn part2(items: &Vec<Vec<IVec2>>) -> String {
     let mut code = String::new();
-    let mut current = Vec2::new(0, 2);
+    let mut current = IVec2::new(0, 2);
 
     for row in items.iter() {
         for dir in row.iter() {
@@ -59,7 +61,7 @@ fn part2(items: &Vec<Vec<Vec2<i32>>>) -> String {
 
 fn challenge(input: &str) -> (i64, String) {
     let contents = std::fs::read_to_string(input).unwrap();
-    let items: Vec<Vec<Vec2<i32>>> = contents
+    let items: Vec<Vec<IVec2>> = contents
         .lines()
         .map(|line| line.chars().map(parse_dir).collect())
         .collect();

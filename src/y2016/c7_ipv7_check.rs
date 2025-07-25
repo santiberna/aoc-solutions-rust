@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::check_result;
 
 struct IPV7 {

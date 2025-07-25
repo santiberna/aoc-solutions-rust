@@ -1,6 +1,4 @@
 use std::collections::{HashMap, HashSet, VecDeque};
-
-use crate::check_result;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -169,4 +167,5 @@ fn challenge(input: &str) -> (usize, usize) {
     (part1, part2)
 }
 
+// use crate::check_result;
 //check_result!("input/C11.txt", 37, 0);

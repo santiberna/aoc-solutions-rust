@@ -1,4 +1,3 @@
-use crate::check_result;
 use md5::Digest;
 
 fn md5_hash(str: &[u8]) -> [u8; 16] {
@@ -10,7 +9,7 @@ fn check_zeros(res: &[u8; 16]) -> bool {
 }
 
 fn get_sixth_hex(res: &[u8; 16]) -> u8 {
-    (res[2] & 0x0F)
+    res[2] & 0x0F
 }
 
 fn get_seventh_hex(res: &[u8; 16]) -> u8 {
@@ -69,4 +68,5 @@ fn challenge(input: &str) -> (String, String) {
     )
 }
 
+//use crate::check_result;
 //check_result!("ugkcyxxp", "d4cd2ee1".to_string(), "f2c730e5".to_string());

@@ -9,6 +9,14 @@ pub mod c8_screen_code;
 pub mod c9_decompressing_text;
 pub mod c10_comparing_bots;
 pub mod c11_generator_elevators;
-
 pub mod c12_assembunny;
 pub mod c13_generate_maze;
+pub mod c14_consecutive_hashes;
+pub mod c15_disc_capsule_fall;
+pub mod c16_dragon_curve_fill;
+pub mod c17_hash_door_locks;
+pub mod c18_generating_traps;
+pub mod c19_elf_presents;
+pub mod c20_ip_ranges;
+pub mod c21_scramble_password;
+pub mod c22_filesystem_storage;

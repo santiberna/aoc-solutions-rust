@@ -1,3 +1,8 @@
+use std::{array, default};
+
+use num::{Num, Signed};
+use md5::Digest;
+
 #[macro_export]
 macro_rules! check_result {
     ($in:expr, $a1:expr, $a2:expr) => {
@@ -8,92 +13,60 @@ macro_rules! check_result {
     };
 }
 
-pub mod math {
+pub fn positive_mod<T>(a: T, m: T) -> T
+where
+    T: Num + Copy + Signed,
+{
+    ((a % m) + m) % m
+}
 
-    use num::Num;
-    use std::ops::{Add, Div, Mul, Neg, Sub};
-
-    #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-    pub struct Vec2<T> {
-        pub x: T,
-        pub y: T,
+/// Computes gcd(a, b) and x, y such that a*x + b*y = gcd(a, b)
+pub fn extended_gcd<T>(a: T, b: T) -> (T, T, T)
+where
+    T: Num + Copy + Signed,
+{
+    if b == T::zero() {
+        (a.abs(), a.signum(), T::zero())
+    } else {
+        let (g, x1, y1) = extended_gcd(b, a % b);
+        (g, y1, x1 - (a / b) * y1)
     }
+}
 
-    impl<T> Vec2<T>
-    where
-        T: Copy + Num + Neg<Output = T>,
+/// Computes modular inverse of a mod m, if it exists
+/// Returns Some(x) where (a * x) % m == 1, or None if inverse doesn't exist
+pub fn modular_inverse<T>(a: T, m: T) -> Option<T> 
+where
+    T: Num + Copy + Signed
     {
-        pub fn new(x: T, y: T) -> Self {
-            Self { x, y }
-        }
+    let (g, x, _) = extended_gcd(a, m);
+    if g != T::one() {
+        None // No inverse exists if a and m are not coprime
+    } else {
+        Some((x % m + m) % m) // ensure positive result
+    }
+}
 
-        pub fn turn_right(&self) -> Self {
-            Self {
-                x: self.y,
-                y: -self.x,
-            }
-        }
+pub fn md5_hash(str: &[u8]) -> [u8; 16] {
+    md5::Md5::digest(str).into()
+}
 
-        pub fn turn_left(&self) -> Self {
-            Self {
-                x: -self.y,
-                y: self.x,
-            }
+pub fn md5_to_hex(hash: &[u8; 16]) -> [u8; 32] {
+
+    let nibble_to_hex = |n| {
+        match n {
+            0..=9 => b'0' + n,
+            10..=15 => b'a' + (n - 10),
+            _ => unreachable!(),
         }
+    };
+
+    let mut hex: [u8; 32] = <[u8; 32]>::default();
+
+    for (i, byte) in hash.iter().enumerate() {
+        hex[2 * i] = nibble_to_hex(byte >> 4);
+        hex[2 * i + 1] = nibble_to_hex(byte & 0x0F);
     }
 
-    // Vector + Vector
-    impl<T> Add for Vec2<T>
-    where
-        T: Num + Copy + Neg<Output = T>,
-    {
-        type Output = Vec2<T>;
-        fn add(self, rhs: Vec2<T>) -> Vec2<T> {
-            Vec2::new(self.x + rhs.x, self.y + rhs.y)
-        }
-    }
-
-    // Vector - Vector
-    impl<T> Sub for Vec2<T>
-    where
-        T: Num + Copy + Neg<Output = T>,
-    {
-        type Output = Vec2<T>;
-        fn sub(self, rhs: Vec2<T>) -> Vec2<T> {
-            Vec2::new(self.x - rhs.x, self.y - rhs.y)
-        }
-    }
-
-    // Vector * Scalar
-    impl<T> Mul<T> for Vec2<T>
-    where
-        T: Num + Copy + Neg<Output = T>,
-    {
-        type Output = Vec2<T>;
-        fn mul(self, rhs: T) -> Vec2<T> {
-            Vec2::new(self.x * rhs, self.y * rhs)
-        }
-    }
-
-    // Vector / Scalar
-    impl<T> Div<T> for Vec2<T>
-    where
-        T: Num + Copy + Neg<Output = T>,
-    {
-        type Output = Vec2<T>;
-        fn div(self, rhs: T) -> Vec2<T> {
-            Vec2::new(self.x / rhs, self.y / rhs)
-        }
-    }
-
-    // -Vector (negation)
-    impl<T> Neg for Vec2<T>
-    where
-        T: Num + Copy + Neg<Output = T>,
-    {
-        type Output = Vec2<T>;
-        fn neg(self) -> Vec2<T> {
-            Vec2::new(-self.x, -self.y)
-        }
-    }
+    hex
 }
