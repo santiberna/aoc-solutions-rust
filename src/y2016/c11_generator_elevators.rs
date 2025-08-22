@@ -168,4 +168,4 @@ fn challenge(input: &str) -> (usize, usize) {
 }
 
 // use crate::check_result;
-//check_result!("input/C11.txt", 37, 0);
+//check_result!("input/Y2016/C11.txt", 37, 0);

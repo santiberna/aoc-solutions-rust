@@ -69,4 +69,4 @@ fn challenge(input: &str) -> (i64, String) {
     (part1(&items), part2(&items))
 }
 
-check_result!("input/C2.txt", 78985, "57DD8".to_string());
+check_result!("input/Y2016/C2.txt", 78985, "57DD8".to_string());

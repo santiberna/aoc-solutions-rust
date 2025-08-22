@@ -153,7 +153,7 @@ fn challenge(input: &str) -> (String, String) {
 }
 
 check_result!(
-    "input/C21.txt",
+    "input/Y2016/C21.txt",
     "bfheacgd".to_string(),
     "gcehdbfa".to_string()
 );

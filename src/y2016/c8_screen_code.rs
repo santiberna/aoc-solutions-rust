@@ -146,4 +146,4 @@ fn challenge(input: &str) -> (i64, String) {
     (answer1, answer2)
 }
 
-check_result!("input/C8.txt", 116, "UPOJFLBCEZ".to_string());
+check_result!("input/Y2016/C8.txt", 116, "UPOJFLBCEZ".to_string());

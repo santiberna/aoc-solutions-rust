@@ -20,3 +20,6 @@ pub mod c19_elf_presents;
 pub mod c20_ip_ranges;
 pub mod c21_scramble_password;
 pub mod c22_filesystem_storage;
+pub mod c23_cracking_safe;
+pub mod c24_travelling_robot;
+pub mod c25_assembunny_wave;

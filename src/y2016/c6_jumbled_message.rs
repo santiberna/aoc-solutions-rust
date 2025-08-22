@@ -33,7 +33,7 @@ fn challenge(input: &str) -> (String, String) {
 }
 
 check_result!(
-    "input/C6.txt",
+    "input/Y2016/C6.txt",
     "wkbvmikb".to_string(),
     "evakwaga".to_string()
 );

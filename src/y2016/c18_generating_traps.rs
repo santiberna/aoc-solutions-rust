@@ -42,4 +42,4 @@ fn challenge(input: &str) -> (usize, usize) {
     (safe_tiles(&start_row, 40), safe_tiles(&start_row, 400000))
 }
 
-//check_result!("input/C18.txt", 1989, 19999894);
+//check_result!("input/Y2016/C18.txt", 1989, 19999894);

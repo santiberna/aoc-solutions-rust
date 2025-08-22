@@ -55,4 +55,4 @@ fn challenge(input: &str) -> (usize, usize) {
     decompress_count(&contents)
 }
 
-check_result!("input/C9.txt", 152851, 11797310782);
+check_result!("input/Y2016/C9.txt", 152851, 11797310782);

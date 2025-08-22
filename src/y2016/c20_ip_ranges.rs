@@ -59,4 +59,4 @@ fn challenge(input: &str) -> (u32, u32) {
     (merged_ranges[0].1 + 1, count_all(&merged_ranges))
 }
 
-check_result!("input/C20.txt", 32259706, 113);
+check_result!("input/Y2016/C20.txt", 32259706, 113);

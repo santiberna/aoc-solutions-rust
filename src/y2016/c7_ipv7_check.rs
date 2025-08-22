@@ -95,4 +95,4 @@ fn challenge(input: &str) -> (i64, i64) {
     (answer1, answer2)
 }
 
-check_result!("input/C7.txt", 118, 260);
+check_result!("input/Y2016/C7.txt", 118, 260);

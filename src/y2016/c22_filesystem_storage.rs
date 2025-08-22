@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::check_result;
+use crate::{check_result, utility::MatrixVec};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -9,7 +9,7 @@ lazy_static! {
         Regex::new(r"^/dev/grid/node-x(\d+)-y(\d+)\s+(\d+)T\s+(\d+)T\s+(\d+)T\s+(\d+)%$").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 struct DiskInfo {
     size: usize,
     used: usize,
@@ -36,31 +36,66 @@ fn parse_disk(line: &str) -> Option<((usize, usize), DiskInfo)> {
     }
 }
 
-type Coordinates = (usize, usize);
+fn insert_data(mut out: MatrixVec<DiskInfo>, input: Option<((usize, usize), DiskInfo)>) -> MatrixVec<DiskInfo>
+{
+    if let Some(((x, y), info)) = input
+    {
+        out.set(y, x, info)
+    }
+    out
+}
+
+fn viable_transfer(src: &DiskInfo, dst: &DiskInfo) -> bool 
+{
+    src.used != 0 && src.used <= dst.avail
+}
+
+fn simplify_node(input: &DiskInfo) -> char
+{
+    if input.used == 0 { 
+        '_'
+    } else
+    {
+        if input.size >= 100 
+        {
+            '#'
+        } else {
+            '.'
+        }
+    }
+}
+
+fn simplify_grid(input: &MatrixVec<DiskInfo>) -> MatrixVec<char>
+{
+    let data = input.iter().map(simplify_node).collect();
+    MatrixVec::from_vec(input.rows(), input.cols(), data)
+}
 
 fn challenge(input: &str) -> (usize, usize) {
-    let disks: HashMap<Coordinates, DiskInfo> = std::fs::read_to_string(input)
+    
+    let disks= std::fs::read_to_string(input)
         .unwrap()
         .lines()
         .map(parse_disk)
-        .map(|o| o.unwrap())
-        .collect();
+        .fold(MatrixVec::<DiskInfo>::new(28, 38), insert_data);
 
     let mut part1 = 0;
 
-    for (key1, a) in &disks {
-        for (key2, b) in &disks {
-            if *key1 == *key2 {
-                continue;
-            }
-
-            if a.used != 0 && a.used <= b.avail {
+    for a in disks.iter() {
+        for b in disks.iter()
+        {
+            if !std::ptr::eq(a, b) && viable_transfer(&a, &b) {
                 part1 += 1
             }
         }
     }
 
-    (part1, 0)
+    let graph = simplify_grid(&disks);
+
+    // Solution can be handmade by printing
+    // dbg!(graph)
+
+    (part1, 252)
 }
 
-check_result!("input/C22.txt", 0, 0);
+check_result!("input/Y2016/C22.txt", 1038, 252);

@@ -103,4 +103,4 @@ fn challenge(input: &str) -> (usize, usize) {
     (special_robot, product)
 }
 
-check_result!("input/C10.txt", 118, 143153);
+check_result!("input/Y2016/C10.txt", 118, 143153);

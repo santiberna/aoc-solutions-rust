@@ -58,4 +58,4 @@ fn challenge(input: &str) -> (i64, i64) {
     (part1, constructive_crt(&input))
 }
 
-check_result!("input/C15.txt", 376777, 3903937);
+check_result!("input/Y2016/C15.txt", 376777, 3903937);
