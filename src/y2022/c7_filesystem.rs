@@ -1,6 +1,10 @@
+use crate::utility::tree::Node;
 use crate::{check_result2, utility};
 use std::cell::RefCell;
+use std::ops::Deref;
+use std::process::Output;
 use std::rc::{Rc, Weak};
+use std::str::FromStr;
 
 const TEST: &str = r#"$ cd /
 $ ls
@@ -28,94 +32,132 @@ $ ls
 
 #[derive(Debug)]
 enum Item {
-    Dir(String, Option<Weak<RefCell<Item>>>, Vec<Rc<RefCell<Item>>>),
+    Directory(String),
     File(String, usize),
 }
 
-fn parse_entry(parent: &Rc<RefCell<Item>>, first: &str, second: &str) -> Rc<RefCell<Item>> {
-    if let Ok(parse) = first.parse() {
-        Rc::new(RefCell::new(Item::File(second.to_string(), parse)))
-    } else {
-        Rc::new(RefCell::new(Item::Dir(
-            second.to_string(),
-            Some(Rc::downgrade(parent)),
-            Vec::new(),
-        )))
+impl Item
+{
+    fn name(&self) -> &str {
+        match self {
+            Item::Directory(name) => name,
+            Item::File(name, _) => name
+        }
     }
 }
 
-fn parse_filesystem(lines: &str) -> Rc<RefCell<Item>> {
-    let root = Rc::new(RefCell::new(Item::Dir("/".to_string(), None, Vec::new())));
+#[derive(Debug)]
+enum Command {
+    Ls(Vec<Item>),
+    Cd(String),
+}
+
+impl FromStr for Command {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let command = if s.starts_with("ls") {
+            Command::Ls(s.lines().skip(1).map(|e| e.parse().unwrap()).collect())
+        } else if s.starts_with("cd") {
+            Command::Cd(s.trim().split(' ').skip(1).next().unwrap().to_string())
+        } else {
+            panic!("Found unknown command {}", &s);
+        };
+        Ok(command)
+    }
+}
+
+impl FromStr for Item {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let words = s.split(' ').collect::<Vec<_>>();
+        Ok(match words[0] {
+            "dir" => Item::Directory(words[1].to_string()),
+            _ => Item::File(words[1].to_string(), words[0].parse().unwrap()),
+        })
+    }
+}
+
+fn parse_filesystem(lines: &str) -> Rc<Node<Item>> {
+
+    let commands = lines.split("$ ").skip(1).map(|e| e.parse().unwrap()).collect::<Vec<Command>>();
+    let root = Node::new(Item::Directory("/".to_string()));
     let mut current = root.clone();
 
-    for command in lines.split('$') {
-        if command.is_empty() {
-            continue;
-        }
+    for command in commands {
+        match command {
+            Command::Cd(target) => {
+                match target.as_str() {
+                    ".." => current = current.parent().unwrap(),
+                    "/" => current = root.clone(),
+                    _ => {
+                        let found = current.children().iter().find(|&e| target == e.name()).cloned();
 
-        let words: Vec<&str> = command.split(' ').collect();
-
-        match words[0] {
-            "cd" => match words[1] {
-                "/" => current = root.clone(),
-                ".." => {
-                    current = if let Item::Dir(_, Some(parent_weak), _) = &*current.borrow() {
-                        parent_weak.upgrade().expect("Parent should exist")
-                    } else {
-                        unreachable!("Root or file has no parent")
-                    };
-                }
-                dir_name => {
-                    let mut new = current.clone();
-                    if let Item::Dir(_, _, children) = &*current.borrow() {
-                        for child in children {
-                            if let Item::Dir(name, _, _) = &*child.borrow() {
-                                if name == dir_name {
-                                    new = child.clone();
-                                    break;
-                                }
-                            }
+                        if let Some(found) = found {
+                            current = found.clone()
+                        } else {
+                            let new = Node::new(Item::Directory(target.clone()));
+                            current = new.clone();
+                            Node::add_child(&current, new);
                         }
-                    }
-                    current = new;
-                }
-            },
-            "ls" => {
-                for entry in words[1..].chunks(2) {
-                    if let Item::Dir(_, _, children) = &mut *current.borrow_mut() {
-                        children.push(parse_entry(&current, entry[0], entry[1]));
                     }
                 }
             }
-            _ => unreachable!(),
+            Command::Ls(contents) => {
+;                for item in contents {
+                    let found = current.children().iter().find(|&e| item.name() == e.name()).cloned();
+
+                    if found.is_none() {
+                        Node::add_child(&current, Node::new(item));
+                    }
+                }
+            }
         }
     }
 
     root
 }
 
-fn print_tree(item: &Rc<RefCell<Item>>, indent: usize) {
-    let prefix = "  ".repeat(indent);
-
-    match &*item.borrow() {
-        Item::File(name, size) => {
-            println!("{}- {} (file, size={})", prefix, name, size);
-        }
-        Item::Dir(name, _, children) => {
-            println!("{}- {} (dir)", prefix, name);
-            for child in children {
-                print_tree(child, indent + 1);
-            }
-        }
+fn visit<F>(item: &Rc<Node<Item>>, visitor: &mut F) where F: FnMut(&Node<Item>)  {
+    visitor(item.deref());
+    for child in item.children().iter() {
+        visit(child, visitor);
     }
 }
 
-fn challenge() -> (usize, usize) {
-    let input: String = utility::input::get_input(2022, 7).unwrap();
-    let root = parse_filesystem(TEST);
-
-    print_tree(&root, 0);
-    (0, 0)
+fn directory_size(node: &Node<Item>) -> usize {
+    let mut accum = 0;
+    for child in node.children().iter() {
+        match child.deref().deref() {
+            Item::Directory(_) => accum += directory_size(child),
+            Item::File(_, size) => accum += size
+        }
+    }
+    accum
 }
 
-check_result2!(0, 0);
+
+fn challenge() -> (usize, usize) {
+    let input: String = utility::input::get_input(2022, 7).unwrap();
+    let root = parse_filesystem(&input);
+
+    let mut directories: Vec<(String, usize)> = vec![];
+
+    let mut visitor = |node: &Node<Item>| {
+        match node.deref() {
+            Item::Directory(name) => directories.push((name.clone(), directory_size(node))),
+            _ => {}
+        }
+    };
+
+    visit(&root, &mut visitor);
+    let sum = directories.iter().skip(1).filter(|(_, size)| *size <= 100000).fold(0, |a, (_, s)| a + s);
+    let total_occupied = directories.first().unwrap().1;
+    let total_free = 70000000 - total_occupied;
+    let total_necessary = 30000000 - total_free;
+
+    let min_necessary = directories.iter().map(|(_, s)| s).filter(|s| **s >= total_necessary).min().unwrap();
+
+    (sum, *min_necessary)
+}
+
+check_result2!(1844187, 4978279);
