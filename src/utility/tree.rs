@@ -1,69 +1,49 @@
-use std::{marker::PhantomData, ptr::NonNull};
 
+use std::cell::{RefCell, Ref};
+use std::rc::{Rc, Weak};
+
+type RcRefCell<T> = Rc<RefCell<T>>; 
+type WeakRefCell<T> = Weak<RefCell<T>>; 
+
+#[derive(Debug)]
 pub struct Node<T> {
-    pub value: T,
-    pub children: Vec<Box<Node<T>>>,
-}
-
-pub struct Zipper<'a, T> {
-    current: NonNull<Node<T>>,
-    parent: Option<Box<Zipper<'a, T>>>,
-    marker: PhantomData<&'a mut Node<T>>,
+    value: T,
+    parent: RefCell<Weak<Node<T>>>,
+    children: RefCell<Vec<Rc<Node<T>>>>,
 }
 
 impl<T> Node<T> {
-    fn new(value: T) -> Self {
-        Self {
+    pub fn new(value: T) -> Rc<Node<T>> {
+        Rc::new(Node {
             value,
-            children: vec![],
-        }
-    }
-
-    fn add_child(&mut self, child: Self) {
-        self.children.push(Box::new(child));
-    }
-
-    fn remove_child(&mut self, index: usize) -> Self {
-        *self.children.swap_remove(index)
-    }
-}
-
-impl<'a, T> Zipper<'a, T> {
-    fn from_root(root: &'a mut Node<T>) -> Self {
-        Self {
-            current: NonNull::from(root),
-            parent: None,
-            marker: PhantomData,
-        }
-    }
-
-    fn get_mut(&mut self) -> &'a mut Node<T> {
-        unsafe { self.current.as_mut() }
-    }
-
-    fn get(&self) -> &'a Node<T>
-    {
-        
-    }
-
-    fn up(self) -> Option<Self> {
-        self.parent.map(|b| *b)
-    }
-
-    fn down(mut self, index: usize) -> Option<Self> {
-        let current = self.get_mut();
-
-        current.children.get_mut(index).map(|child| Self {
-            current: NonNull::from(child.as_mut()),
-            parent: Some(Box::new(self)),
-            marker: PhantomData,
+            parent: RefCell::new(Weak::new()),
+            children: RefCell::new(vec![]),
         })
     }
 
-    fn root(self) -> Self {
-        match self.parent {
-            Some(p) => p.root(),
-            None => self,
-        }
+    pub fn add_child(parent: &Rc<Node<T>>, child: Rc<Node<T>>) {
+        *child.parent.borrow_mut() = Rc::downgrade(parent);
+        parent.children.borrow_mut().push(child);
+    }
+
+    pub fn children(&'_ self) -> Ref<'_, Vec<Rc<Node<T>>>> {
+        self.children.borrow()
+    }
+
+    pub fn parent(&self) -> Option<Rc<Node<T>>> {
+        self.parent.borrow().upgrade()
+    }
+}
+
+impl<T> std::ops::Deref for Node<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+impl<T> std::ops::DerefMut for Node<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
     }
 }
