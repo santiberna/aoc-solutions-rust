@@ -13,7 +13,7 @@ const DIRECTIONS: [(u8, IVec2); 4] = [
 ];
 
 fn open_doors(input: &[u8]) -> [bool; 4] {
-    let hash = utility::md5_to_hex(&utility::md5_hash(input));
+    let hash = utility::hash::md5_to_hex(&utility::hash::md5_hash(input));
 
     std::array::from_fn(|i| match hash[i] {
         b'0'..=b'a' => false,

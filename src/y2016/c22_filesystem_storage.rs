@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{check_result, utility::MatrixVec};
+use crate::{check_result, utility::matrix::MatrixVec};
 use lazy_static::lazy_static;
 use regex::Regex;
 

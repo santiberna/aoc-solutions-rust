@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, HashSet, VecDeque};
 
 use nalgebra::Vector2;
 
-use crate::{check_result, utility::MatrixVec};
+use crate::{check_result, utility::matrix::MatrixVec};
 
 type Vec2 = Vector2<i64>;
 

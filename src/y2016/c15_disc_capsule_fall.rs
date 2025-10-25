@@ -10,7 +10,7 @@ lazy_static! {
 
 fn into_equation(&(index, length, time, current): &(i64, i64, i64, i64)) -> (i64, i64) {
     (
-        -utility::positive_mod(current - time + index, length),
+        -utility::modular::positive_mod(current - time + index, length),
         length,
     )
 }
@@ -35,12 +35,12 @@ fn constructive_crt(input: &Vec<(i64, i64)>) -> i64 {
 
     for &(remainder, modulus) in input.iter() {
         let mod_exclude = product_mod / modulus;
-        let modular_inverse = utility::modular_inverse(mod_exclude, modulus).unwrap();
+        let modular_inverse = utility::modular::modular_inverse(mod_exclude, modulus).unwrap();
 
         sum += remainder * mod_exclude * modular_inverse
     }
 
-    utility::positive_mod(sum, product_mod)
+    utility::modular::positive_mod(sum, product_mod)
 }
 
 fn challenge(input: &str) -> (i64, i64) {
