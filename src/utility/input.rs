@@ -1,7 +1,9 @@
 use std::{error::Error};
 
 fn download_input(link: &str) -> Result<String, Box<dyn Error>> {
-    let cookie = std::fs::read_to_string("session.txt").map_err(Box::new)?;
+    
+    dotenv::dotenv().ok();
+    let session = std::env::var(AOC_SESSION).unwrap().parse().unwrap();
     let client = reqwest::blocking::Client::new();
 
     let request = client
