@@ -5,4 +5,5 @@ pub mod c4_elf_ranges;
 pub mod c5_move_crates;
 pub mod c6_signal_fix;
 pub mod c7_filesystem;
-pub mod c8_count_trees;
+//pub mod c8_count_trees;
+pub mod c10_cpu_cycles;

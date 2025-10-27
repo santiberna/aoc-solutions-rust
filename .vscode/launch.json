@@ -42,7 +42,7 @@
             },
             "args": ["--show-output", "--test-threads=1"],
             "cwd": "${workspaceFolder}"
-        }
+        },
 
         {
             "type": "lldb",
