@@ -11,4 +11,4 @@ lazy_static = "1.5.0"
 nalgebra = "0.33.2"
 reqwest = { version = "0.12.23", features = ["blocking"] }
 tokio = { version = "1.47.1", features = ["full"] }
-dot-envy ={ version = "0.15.7" }
+dotenvy ={ version = "0.15.7" }

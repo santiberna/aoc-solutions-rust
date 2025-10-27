@@ -1,18 +1,23 @@
 use std::{error::Error};
 
 fn download_input(link: &str) -> Result<String, Box<dyn Error>> {
-    
-    dotenv::dotenv().ok();
-    let session = std::env::var(AOC_SESSION).unwrap().parse().unwrap();
+    dotenvy::dotenv()?;
+
+    let session = std::env::var("AOC_SESSION").unwrap();
     let client = reqwest::blocking::Client::new();
 
     let request = client
         .get(link)
-        .header(reqwest::header::COOKIE, cookie)
+        .header(reqwest::header::COOKIE, format!("session={}", session))
         .send()
         .map_err(Box::new)?;
 
-    Ok(request.text().map_err(Box::new)?)
+    let text = request.text().map_err(Box::new)?;
+    if text.starts_with("Puzzle inputs differ by user.  Please log in to get your puzzle input.") {
+        Err("Session Code is expired or invalid".into())
+    } else {
+        Ok(text)
+    }
 }
 
 fn read_cached_input(year: usize, challenge: usize) -> Option<String> {
