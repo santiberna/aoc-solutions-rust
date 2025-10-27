@@ -1,9 +1,8 @@
-use std::{error::Error};
+use std::error::Error;
 
 fn download_input(link: &str) -> Result<String, Box<dyn Error>> {
     dotenvy::dotenv()?;
-
-    let session = std::env::var("AOC_SESSION").unwrap();
+    let session = std::env::var("AOC_SESSION").expect("AOC_SESSION env variable not provided!");
     let client = reqwest::blocking::Client::new();
 
     let request = client
@@ -32,7 +31,8 @@ pub fn get_input(year: usize, challenge: usize) -> Result<String, Box<dyn Error>
         let link = format!("https://adventofcode.com/{}/day/{}/input", year, challenge);
 
         let input = download_input(&link)?;
-        let path = format!("input/Y{}_C{}.txt", year, challenge);
+        let path = format!("./input/Y{}_C{}.txt", year, challenge);
+        std::fs::create_dir_all("./input")?;
         std::fs::write(path, &input).map_err(Box::new)?;
 
         Ok(input)
