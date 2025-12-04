@@ -1,9 +1,10 @@
 pub mod assembunny;
-pub mod input;
-pub mod tree;
-pub mod modular;
+pub mod directions;
 pub mod hash;
+pub mod input;
 pub mod matrix;
+pub mod modular;
+pub mod tree;
 
 #[macro_export]
 macro_rules! check_result {

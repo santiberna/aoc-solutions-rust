@@ -5,6 +5,16 @@ pub struct MatrixVec<T> {
     data: Vec<T>,
 }
 
+impl MatrixVec<char> {
+    pub fn from_string(str: &str) -> Self {
+        let slices = str
+            .lines()
+            .map(|s| s.chars().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+        Self::from_slices(&slices)
+    }
+}
+
 impl<T> MatrixVec<T>
 where
     T: Clone + Default,
@@ -16,6 +26,16 @@ where
             cols,
             data: vec![T::default(); rows * cols],
         }
+    }
+
+    pub fn from_slices<S: AsRef<[T]>>(data: &[S]) -> Self {
+        let rows = data.first().unwrap().as_ref().len();
+        let cols = data.len();
+        let data = data.iter().fold(Vec::<T>::new(), |mut acc, slice| {
+            acc.extend_from_slice(slice.as_ref());
+            acc
+        });
+        Self::from_vec(rows, cols, data)
     }
 }
 
