@@ -11,7 +11,7 @@ fn sum_strs(strs: &[&str]) -> i64 {
     strs.iter().fold(0, sum)
 }
 
-fn challenge(input: &str) -> (i64, i64) {
+fn challenge(_: &str) -> (i64, i64) {
     let file = utility::input::get_input(2022, 1).unwrap();
     let lines: Vec<&str> = file.lines().collect();
 

@@ -10,14 +10,13 @@ enum Turn {
     RIGHT,
 }
 
- fn turn_right(pos: &IVec2) -> IVec2 {
-            IVec2::new(pos.y, -pos.x)
-            
-        }
+fn turn_right(pos: &IVec2) -> IVec2 {
+    IVec2::new(pos.y, -pos.x)
+}
 
-         fn turn_left(pos: &IVec2) -> IVec2 {
-            IVec2::new(-pos.y, pos.x)
-        }
+fn turn_left(pos: &IVec2) -> IVec2 {
+    IVec2::new(-pos.y, pos.x)
+}
 
 fn parse_dir(elem: &str) -> (Turn, i32) {
     let (turn, number) = elem.split_at(1);

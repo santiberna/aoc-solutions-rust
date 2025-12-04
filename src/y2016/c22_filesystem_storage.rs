@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::{check_result, utility::matrix::MatrixVec};
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -36,44 +34,35 @@ fn parse_disk(line: &str) -> Option<((usize, usize), DiskInfo)> {
     }
 }
 
-fn insert_data(mut out: MatrixVec<DiskInfo>, input: Option<((usize, usize), DiskInfo)>) -> MatrixVec<DiskInfo>
-{
-    if let Some(((x, y), info)) = input
-    {
+fn insert_data(
+    mut out: MatrixVec<DiskInfo>,
+    input: Option<((usize, usize), DiskInfo)>,
+) -> MatrixVec<DiskInfo> {
+    if let Some(((x, y), info)) = input {
         out.set(y, x, info)
     }
     out
 }
 
-fn viable_transfer(src: &DiskInfo, dst: &DiskInfo) -> bool 
-{
+fn viable_transfer(src: &DiskInfo, dst: &DiskInfo) -> bool {
     src.used != 0 && src.used <= dst.avail
 }
 
-fn simplify_node(input: &DiskInfo) -> char
-{
-    if input.used == 0 { 
+fn simplify_node(input: &DiskInfo) -> char {
+    if input.used == 0 {
         '_'
-    } else
-    {
-        if input.size >= 100 
-        {
-            '#'
-        } else {
-            '.'
-        }
+    } else {
+        if input.size >= 100 { '#' } else { '.' }
     }
 }
 
-fn simplify_grid(input: &MatrixVec<DiskInfo>) -> MatrixVec<char>
-{
+fn simplify_grid(input: &MatrixVec<DiskInfo>) -> MatrixVec<char> {
     let data = input.iter().map(simplify_node).collect();
     MatrixVec::from_vec(input.rows(), input.cols(), data)
 }
 
 fn challenge(input: &str) -> (usize, usize) {
-    
-    let disks= std::fs::read_to_string(input)
+    let disks = std::fs::read_to_string(input)
         .unwrap()
         .lines()
         .map(parse_disk)
@@ -82,18 +71,17 @@ fn challenge(input: &str) -> (usize, usize) {
     let mut part1 = 0;
 
     for a in disks.iter() {
-        for b in disks.iter()
-        {
+        for b in disks.iter() {
             if !std::ptr::eq(a, b) && viable_transfer(&a, &b) {
                 part1 += 1
             }
         }
     }
 
-    let graph = simplify_grid(&disks);
+    let _graph = simplify_grid(&disks);
 
     // Solution can be handmade by printing
-    // dbg!(graph)
+    // dbg!(_graph)
 
     (part1, 252)
 }

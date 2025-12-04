@@ -1,5 +1,5 @@
 use crate::{check_result2, utility};
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 #[derive(Debug)]
 enum Instruction {

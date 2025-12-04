@@ -1,3 +1,5 @@
+use std::ops::AddAssign;
+
 use num::Num;
 use num::Signed;
 
@@ -33,4 +35,20 @@ where
     } else {
         Some((x % m + m) % m) // ensure positive result
     }
+}
+
+pub fn get_divisors<N: Num + Ord + AddAssign + Copy>(n: N) -> Vec<N> {
+    let mut v = Vec::new();
+    let mut i = N::one();
+    while i * i <= n {
+        if n % i == N::zero() {
+            v.push(i);
+            if i != n / i {
+                v.push(n / i);
+            }
+        }
+        i += N::one();
+    }
+    v.sort();
+    v
 }

@@ -1,5 +1,3 @@
-use crate::check_result;
-
 fn determine_tile(left: bool, center: bool, right: bool) -> bool {
     (left && center && !right)
         || (!left && center && right)

@@ -1,7 +1,5 @@
-use std::collections::HashMap;
-
-use crate::check_result;
 use md5::Digest;
+use std::collections::HashMap;
 
 fn contains_a_triple(range: &[u8]) -> Option<u8> {
     range

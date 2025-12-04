@@ -1,5 +1,5 @@
 use crate::check_result2;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 fn map_ascii_char(item: &u8) -> usize {
     (if item.is_ascii_uppercase() {

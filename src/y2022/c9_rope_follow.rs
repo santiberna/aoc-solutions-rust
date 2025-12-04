@@ -1,4 +1,3 @@
-use core::hash;
 use std::collections::HashSet;
 
 use crate::check_result2;
@@ -112,4 +111,4 @@ fn challenge() -> (usize, usize) {
     (answer1, answer2)
 }
 
-check_result2!(0, 0);
+check_result2!(6209, 2460);

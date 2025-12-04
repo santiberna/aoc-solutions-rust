@@ -1,6 +1,5 @@
 use crate::check_result2;
 use crate::utility::matrix;
-use nalgebra::Vector2;
 
 type IVec2 = nalgebra::Vector2<i32>;
 

@@ -1,9 +1,8 @@
-
-use std::cell::{RefCell, Ref};
+use std::cell::{Ref, RefCell};
 use std::rc::{Rc, Weak};
 
-type RcRefCell<T> = Rc<RefCell<T>>; 
-type WeakRefCell<T> = Weak<RefCell<T>>; 
+type RcRefCell<T> = Rc<RefCell<T>>;
+type WeakRefCell<T> = Weak<RefCell<T>>;
 
 #[derive(Debug)]
 pub struct Node<T> {

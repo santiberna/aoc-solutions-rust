@@ -1,4 +1,3 @@
-use crate::check_result;
 use crate::utility::assembunny;
 
 fn run_seven(code: &Vec<assembunny::Instruction>) -> i64 {

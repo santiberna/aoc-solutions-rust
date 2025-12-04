@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet, VecDeque};
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 lazy_static! {
     static ref CHIP_REGEX: Regex = Regex::new(r"(\w+)-compatible microchip").unwrap();

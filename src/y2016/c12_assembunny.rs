@@ -1,8 +1,7 @@
 use crate::check_result;
-use crate::utility::assembunny::{self, Instruction};
+use crate::utility::assembunny;
 
 fn challenge(input: &str) -> (i64, i64) {
-
     let mut code: Vec<assembunny::Instruction> = std::fs::read_to_string(input)
         .unwrap()
         .lines()

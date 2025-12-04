@@ -50,7 +50,7 @@ fn setup_graph(mut acc: HashMap<usize, Node>, s: &str) -> HashMap<usize, Node> {
             _ => panic!(),
         };
 
-        acc.insert(from, (low, high)).is_none();
+        assert!(acc.insert(from, (low, high)).is_none());
     }
 
     acc

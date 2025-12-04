@@ -1,6 +1,6 @@
 use crate::check_result;
 
-fn challenge(input: &str) -> (i64, i64) {
+fn challenge(_: &str) -> (i64, i64) {
     let mut test = 2;
 
     loop {

@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use crate::check_result;
 
 fn extract_range(str: &str) -> (u32, u32) {
@@ -40,7 +38,7 @@ fn count_all(input: &Vec<(u32, u32)>) -> u32 {
     let mut current = u32::MAX;
 
     for &(a, b) in input {
-        current -= (b - a + 1)
+        current -= b - a + 1
     }
 
     current + 1
