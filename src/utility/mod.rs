@@ -5,6 +5,8 @@ pub mod input;
 pub mod matrix;
 pub mod modular;
 pub mod tree;
+pub mod ranges;
+pub mod parsing;
 
 #[macro_export]
 macro_rules! check_result {
