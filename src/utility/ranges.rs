@@ -1,5 +1,3 @@
-use std::ops::RangeBounds;
-
 fn merge_range(a: &(i64, i64), b: &(i64, i64)) -> Option<(i64, i64)> {
     let (a_start, a_end) = *a;
     let (b_start, b_end) = *b;
