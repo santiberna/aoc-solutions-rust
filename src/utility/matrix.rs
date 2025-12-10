@@ -39,6 +39,26 @@ where
     }
 }
 
+impl<T> MatrixVec<T>
+where
+    T: Clone 
+{
+    /// Swaps the values in two rows
+    pub fn swap_rows(&mut self, a: usize, b: usize) {
+        let row2 = &self.data[b * self.cols..(b+1)*self.cols];
+        let temp = row2.to_vec();
+
+        for i in 0..self.cols {
+            let v = self.get(a, i).unwrap().clone();
+            *self.get_mut(b, i).unwrap() = v;
+        }
+
+        for (i, t) in temp.into_iter().enumerate() {
+            *self.get_mut(a, i).unwrap() = t;
+        }
+    }
+}
+
 impl<T> MatrixVec<T> {
     /// Immutable iterator over all elements in row-major order
     pub fn iter(&self) -> impl Iterator<Item = &T> {
