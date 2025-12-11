@@ -41,11 +41,11 @@ where
 
 impl<T> MatrixVec<T>
 where
-    T: Clone 
+    T: Clone,
 {
     /// Swaps the values in two rows
     pub fn swap_rows(&mut self, a: usize, b: usize) {
-        let row2 = &self.data[b * self.cols..(b+1)*self.cols];
+        let row2 = &self.data[b * self.cols..(b + 1) * self.cols];
         let temp = row2.to_vec();
 
         for i in 0..self.cols {
@@ -63,6 +63,11 @@ impl<T> MatrixVec<T> {
     /// Immutable iterator over all elements in row-major order
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.data.iter()
+    }
+
+    /// Iterator over all rows
+    pub fn iter_rows(&self) -> impl Iterator<Item = &[T]> {
+        (0..self.rows).map(|n| self.get_row(n).unwrap())
     }
 
     /// Creates a new matrix from a Vec, panicking if the length is incorrect.
@@ -99,6 +104,22 @@ impl<T> MatrixVec<T> {
         }
     }
 
+    pub fn get_row(&self, row: usize) -> Option<&[T]> {
+        if row < self.rows {
+            Some(&self.data[row * self.cols..(row + 1) * self.cols])
+        } else {
+            None
+        }
+    }
+
+    pub fn get_row_mut(&mut self, row: usize) -> Option<&mut [T]> {
+        if row < self.rows {
+            Some(&mut self.data[row * self.cols..(row + 1) * self.cols])
+        } else {
+            None
+        }
+    }
+
     /// Gets a mutable reference to the element at (row, col).
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         if row < self.rows && col < self.cols {
@@ -120,7 +141,7 @@ impl<T> MatrixVec<T> {
     /// Get an iterator for a specific row
     pub fn row_iter(&self, row: usize) -> impl Iterator<Item = &T> {
         assert!(row < self.rows());
-        let start = row*self.cols();
+        let start = row * self.cols();
         let end = start + self.cols();
         self.data[start..end].iter()
     }
@@ -128,7 +149,7 @@ impl<T> MatrixVec<T> {
     /// Get an iterator for a specific row
     pub fn row_iter_mut(&mut self, row: usize) -> impl Iterator<Item = &mut T> {
         assert!(row < self.rows());
-        let start = row*self.cols();
+        let start = row * self.cols();
         let end = start + self.cols();
         self.data[start..end].iter_mut()
     }
@@ -136,13 +157,21 @@ impl<T> MatrixVec<T> {
     /// Get an iterator for a specific column
     pub fn col_iter(&self, col: usize) -> impl Iterator<Item = &T> {
         assert!(col < self.cols());
-        ColumnIter { source: self, index: 0, column: col } 
+        ColumnIter {
+            source: self,
+            index: 0,
+            column: col,
+        }
     }
 
     /// Get an iterator for a specific column
     pub fn col_iter_mut(&mut self, col: usize) -> impl Iterator<Item = &mut T> {
         assert!(col < self.cols());
-        ColumnIterMut { source: self, index: 0, column: col } 
+        ColumnIterMut {
+            source: self,
+            index: 0,
+            column: col,
+        }
     }
 }
 
