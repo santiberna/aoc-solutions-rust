@@ -1,4 +1,4 @@
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct MatrixVec<T> {
     rows: usize,
     cols: usize,
@@ -36,6 +36,50 @@ where
             acc
         });
         Self::from_vec(rows, cols, data)
+    }
+
+    /// Transpose the matrix
+    pub fn transpose(self) -> Self {
+        let rows = self.rows;
+        let cols = self.cols;
+
+        let mut new_data = vec![T::default(); self.data.len()];
+
+        for i in 0..rows {
+            for j in 0..cols {
+                new_data[j * rows + i] = self.data[i * cols + j].clone();
+            }
+        }
+
+        Self::from_vec(cols, rows, new_data)
+    }
+
+    /// Flip the matrix
+    pub fn flip(mut self, vertical: bool) -> Self {
+       
+        if vertical {
+            for i in 0..self.rows {
+                let base = i * self.cols;
+                for j in 0..self.cols / 2 {
+                    self.data.swap(base + j, base + (self.cols - 1 - j));
+                }
+            }
+        } else {
+            for i in 0..self.rows / 2 {
+                let a = i * self.cols;
+                let b = (self.rows - 1 - i) * self.cols;
+                for j in 0..self.cols {
+                    self.data.swap(a + j, b + j);
+                }
+            }
+        }
+
+        self
+    }
+
+    /// Rotate the matrix ccw
+    pub fn rotate(self) -> Self {
+        self.transpose().flip(false)
     }
 }
 
