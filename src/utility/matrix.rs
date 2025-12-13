@@ -219,6 +219,15 @@ impl<T> MatrixVec<T> {
     }
 }
 
+impl<T> IntoIterator for MatrixVec<T> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.into_iter()
+    }
+}
+
 pub struct ColumnIter<'a, T> {
     source: &'a MatrixVec<T>,
     index: usize,

@@ -43,7 +43,7 @@ pub enum Symmetry {
     Rotation,
 }
 
-fn find_variations(present: &MatrixVec<char>) -> Vec<MatrixVec<char>> {
+fn find_variations(present: &MatrixVec<bool>) -> Vec<MatrixVec<bool>> {
     let mut permutations = vec![];
     for i in 0..4 {
         for f in 0..4 {
@@ -73,19 +73,98 @@ fn find_variations(present: &MatrixVec<char>) -> Vec<MatrixVec<char>> {
     permutations
 }
 
-fn parse_box(lines: &str) -> MatrixVec<char> {
-    let separator = lines.find(':').unwrap();
-    let line = &lines[separator + 1..];
-    dbg!(line);
-    MatrixVec::from_string(line.trim())
+fn to_bool_matrix(mat: MatrixVec<char>) -> MatrixVec<bool> {
+    let cols = mat.cols();
+    let rows = mat.rows();
+    let data = mat.into_iter().map(|c| match c {
+        '#' => true, '.' => false, _ => panic!()
+    }).collect::<Vec<_>>();
+    MatrixVec::from_vec(rows, cols, data)
 }
 
-fn parse_target(line: &str) -> ([i64; 2], Vec<i64>) {
-    let numbers = parse_all_numbers(line);
+fn parse_box(lines: &str) -> MatrixVec<bool> {
+    let separator = lines.find(':').unwrap();
+    let line = &lines[separator + 1..];
+
+    let boxe = MatrixVec::from_string(line.trim());
+    to_bool_matrix(boxe)
+}
+
+fn parse_target(line: &str) -> ([usize; 2], Vec<usize>) {
+    let numbers = parse_all_numbers::<usize>(line);
     (
         [numbers[0], numbers[1]],
         numbers.into_iter().skip(2).collect(),
     )
+}
+
+fn box_fits(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>) -> bool {
+    if y + box_v.rows() > grid.rows() || x + box_v.cols() > grid.cols() {
+        return false;
+    }
+
+    for by in 0..box_v.rows() {
+        for bx in 0..box_v.cols() {
+            if *box_v.get(by, bx).unwrap() {          
+                if *grid.get(y + by, x + bx).unwrap() {
+                    return false;
+                }
+            }
+        }
+    }
+
+    true
+}
+
+fn place_box(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>) -> MatrixVec<bool> {
+    let mut grid = grid.clone();
+
+    for by in 0..box_v.rows() {
+        for bx in 0..box_v.cols() {
+            if *box_v.get(by, bx).unwrap() {
+                *grid.get_mut(y + by, x + bx).unwrap() = true
+            }
+        }
+    }
+
+    grid
+}
+
+fn recursive_search(boxes: &Vec<Vec<MatrixVec<bool>>>, current_state: &MatrixVec<bool>, current_counts: &[usize]) -> bool {
+    let Some(next_box) = current_counts.iter().position(|v| *v != 0) else {
+        return true;
+    };
+
+    let next_counts = { 
+        let mut c = current_counts.to_vec(); 
+        c[next_box] -= 1;
+        c 
+    };
+    
+    let picked_box = &boxes[next_box];
+
+    for box_variation in picked_box.iter() {
+        for y in 1..current_state.rows()-1 {
+            for x in 1..current_state.cols()-1 {
+                if *current_state.get(y, x).unwrap() {
+                    continue;
+                }
+
+                if !box_fits(x-1, y-1, box_variation, current_state) {
+                    continue;
+                }
+
+                let next_grid = place_box(x, y, box_variation, current_state);
+                let recurse = recursive_search(boxes, &next_grid, &next_counts);
+                
+                if recurse {
+                    return true
+                }
+            }
+        }
+    }
+
+    false
 }
 
 fn challenge() -> (usize, usize) {
@@ -109,13 +188,25 @@ fn challenge() -> (usize, usize) {
         (dbg!(boxes), dbg!(targets))
     };
 
-    {
-        let variations = boxes.iter().map(find_variations).collect::<Vec<_>>();
-        dbg!(variations);
-    }
-
     let mut answer1 = 0;
     let mut answer2 = 0;
+
+    let box_variations = boxes.iter().map(find_variations).collect::<Vec<_>>();
+    let box_areas = boxes.iter().map(|v| v.iter().filter(|v| **v).count()).collect::<Vec<_>>();
+    
+    dbg!(&box_areas);
+    dbg!(&box_variations);
+
+    for (size, required) in &targets[2..3] {
+
+        // Cheap initial pruning
+
+
+        let start_grid = MatrixVec::<bool>::new(size[1], size[0]);
+        answer1 += if recursive_search(&box_variations, &start_grid, &required) {
+            1
+        } else { 0 };
+    }
 
     (answer1, answer2)
 }
