@@ -56,7 +56,6 @@ where
 
     /// Flip the matrix
     pub fn flip(mut self, vertical: bool) -> Self {
-       
         if vertical {
             for i in 0..self.rows {
                 let base = i * self.cols;

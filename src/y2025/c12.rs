@@ -76,9 +76,14 @@ fn find_variations(present: &MatrixVec<bool>) -> Vec<MatrixVec<bool>> {
 fn to_bool_matrix(mat: MatrixVec<char>) -> MatrixVec<bool> {
     let cols = mat.cols();
     let rows = mat.rows();
-    let data = mat.into_iter().map(|c| match c {
-        '#' => true, '.' => false, _ => panic!()
-    }).collect::<Vec<_>>();
+    let data = mat
+        .into_iter()
+        .map(|c| match c {
+            '#' => true,
+            '.' => false,
+            _ => panic!(),
+        })
+        .collect::<Vec<_>>();
     MatrixVec::from_vec(rows, cols, data)
 }
 
@@ -99,13 +104,13 @@ fn parse_target(line: &str) -> ([usize; 2], Vec<usize>) {
 }
 
 fn box_fits(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>) -> bool {
-    if y + box_v.rows() > grid.rows() || x + box_v.cols() > grid.cols() {
+    if y - 1 + box_v.rows() > grid.rows() || x - 1 + box_v.cols() > grid.cols() {
         return false;
     }
 
-    for by in 0..box_v.rows() {
-        for bx in 0..box_v.cols() {
-            if *box_v.get(by, bx).unwrap() {          
+    for by in 1..box_v.rows() - 1 {
+        for bx in 1..box_v.cols() - 1 {
+            if *box_v.get(by, bx).unwrap() {
                 if *grid.get(y + by, x + bx).unwrap() {
                     return false;
                 }
@@ -116,11 +121,16 @@ fn box_fits(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>)
     true
 }
 
-fn place_box(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>) -> MatrixVec<bool> {
+fn place_box(
+    x: usize,
+    y: usize,
+    box_v: &MatrixVec<bool>,
+    grid: &MatrixVec<bool>,
+) -> MatrixVec<bool> {
     let mut grid = grid.clone();
 
-    for by in 0..box_v.rows() {
-        for bx in 0..box_v.cols() {
+    for by in 1..box_v.rows() - 1 {
+        for bx in 1..box_v.cols() - 1 {
             if *box_v.get(by, bx).unwrap() {
                 *grid.get_mut(y + by, x + bx).unwrap() = true
             }
@@ -130,35 +140,39 @@ fn place_box(x: usize, y: usize, box_v: &MatrixVec<bool>, grid: &MatrixVec<bool>
     grid
 }
 
-fn recursive_search(boxes: &Vec<Vec<MatrixVec<bool>>>, current_state: &MatrixVec<bool>, current_counts: &[usize]) -> bool {
+fn recursive_search(
+    boxes: &Vec<Vec<MatrixVec<bool>>>,
+    current_state: &MatrixVec<bool>,
+    current_counts: &[usize],
+) -> bool {
     let Some(next_box) = current_counts.iter().position(|v| *v != 0) else {
         return true;
     };
 
-    let next_counts = { 
-        let mut c = current_counts.to_vec(); 
+    let next_counts = {
+        let mut c = current_counts.to_vec();
         c[next_box] -= 1;
-        c 
+        c
     };
-    
+
     let picked_box = &boxes[next_box];
 
     for box_variation in picked_box.iter() {
-        for y in 1..current_state.rows()-1 {
-            for x in 1..current_state.cols()-1 {
+        for y in 1..current_state.rows() - 1 {
+            for x in 1..current_state.cols() - 1 {
                 if *current_state.get(y, x).unwrap() {
                     continue;
                 }
 
-                if !box_fits(x-1, y-1, box_variation, current_state) {
+                if !box_fits(x, y, box_variation, current_state) {
                     continue;
                 }
 
                 let next_grid = place_box(x, y, box_variation, current_state);
                 let recurse = recursive_search(boxes, &next_grid, &next_counts);
-                
+
                 if recurse {
-                    return true
+                    return true;
                 }
             }
         }
@@ -171,7 +185,7 @@ fn challenge() -> (usize, usize) {
     let input = utility::input::get_input(2025, 12).unwrap();
 
     let (boxes, targets) = {
-        let sections = TEST.split("\n\n").map(str::trim).collect::<Vec<_>>();
+        let sections = input.split("\n\n").map(str::trim).collect::<Vec<_>>();
 
         let boxes = sections[0..sections.len() - 1]
             .iter()
@@ -185,27 +199,53 @@ fn challenge() -> (usize, usize) {
             .map(parse_target)
             .collect::<Vec<_>>();
 
-        (dbg!(boxes), dbg!(targets))
+        (boxes, targets)
     };
 
     let mut answer1 = 0;
     let mut answer2 = 0;
 
     let box_variations = boxes.iter().map(find_variations).collect::<Vec<_>>();
-    let box_areas = boxes.iter().map(|v| v.iter().filter(|v| **v).count()).collect::<Vec<_>>();
-    
+    let box_areas = boxes
+        .iter()
+        .map(|v| v.iter().filter(|v| **v).count())
+        .collect::<Vec<_>>();
+
     dbg!(&box_areas);
     dbg!(&box_variations);
 
-    for (size, required) in &targets[2..3] {
+    for (size, required) in targets {
+        println!("{}x{}: {:?}", size[0], size[1], &required);
 
         // Cheap initial pruning
+        let area = size[0] * size[1];
+        let box_count = required.iter().sum::<usize>();
 
+        if dbg!(area) >= dbg!(box_count * 9) {
+            println!("Skipped big grid!");
+            answer1 += 1;
+            continue;
+        }
 
-        let start_grid = MatrixVec::<bool>::new(size[1], size[0]);
-        answer1 += if recursive_search(&box_variations, &start_grid, &required) {
-            1
-        } else { 0 };
+        let total_box_size = required
+            .iter()
+            .zip(box_areas.iter())
+            .map(|(a, b)| a * b)
+            .sum::<usize>();
+
+        if area < total_box_size {
+            println!("Skipped small grid!");
+            continue;
+        }
+
+        // We have been bamboozled
+        unimplemented!()
+        // let start_grid = MatrixVec::<bool>::new(size[1], size[0]);
+        // answer1 += if recursive_search(&box_variations, &start_grid, &required) {
+        //     1
+        // } else {
+        //     0
+        // };
     }
 
     (answer1, answer2)
